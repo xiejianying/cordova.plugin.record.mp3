@@ -6,7 +6,7 @@
         <license>Apache 2.0</license>
         <keywords>cordova,media,record</keywords>
         <js-module src="www/MywooMedia.js" name="myMedia">
-            <clobbers target="MywooMedia" />
+            <clobbers target="myMedia" />
         </js-module>
         
     <!-- android -->
