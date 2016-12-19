@@ -34,7 +34,7 @@ public class DataEncodeThread extends Thread implements AudioRecord.OnRecordPosi
 		WeakReference<DataEncodeThread> encodeThread;
 		
 		public StopHandler(DataEncodeThread encodeThread) {
-			this.encodeThread = new WeakReference<DataEncodeThread>(encodeThread);
+			this.encodeThread = new WeakReference<>(encodeThread);
 		}
 		
 		@Override

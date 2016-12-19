@@ -4,6 +4,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Message;
+import android.util.Log;
 
 import com.czt.mp3recorder.util.LameUtil;
 
@@ -11,6 +12,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class MP3Recorder {
+
+	private String tag = "MP3Recorder";
 	//=======================AudioRecord Default Settings=======================
 	private static final int DEFAULT_AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
 	/**
@@ -65,22 +68,28 @@ public class MP3Recorder {
 	public void start() throws IOException {
 		if (mIsRecording) return;
 	    initAudioRecorder();
+		Log.d(tag, "start recording...");
 		mAudioRecord.startRecording();
+		Log.d(tag, "new Thread...");
+		mIsRecording = true;
 		new Thread() {
 
 			@Override
 			public void run() {
 				//设置线程权限
 				android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-				mIsRecording = true;
+
+				Log.d(tag,"record thread start!!!!!!!!!!!!!!!!!!!!");
 				while (mIsRecording) {
 					int readSize = mAudioRecord.read(mPCMBuffer, 0, mBufferSize);
 					if (readSize > 0) {
 						mEncodeThread.addTask(mPCMBuffer, readSize);
 						calculateRealVolume(mPCMBuffer, readSize);
+						Log.d(tag,"音量大小:"+mVolume);
 					}
 				}
 				// release and finalize audioRecord
+
 				mAudioRecord.stop();
 				mAudioRecord.release();
 				mAudioRecord = null;
@@ -89,27 +98,35 @@ public class MP3Recorder {
 				Message msg = Message.obtain(mEncodeThread.getHandler(),
 						DataEncodeThread.PROCESS_STOP);
 				msg.sendToTarget();
+				Log.d(tag,"record thread over!!!!!!!!!!!!!!!!!!!!");
 			}
-			/**
-			 * 此计算方法来自samsung开发范例
-			 * 
-			 * @param buffer buffer
-			 * @param readSize readSize
-			 */
-			private void calculateRealVolume(short[] buffer, int readSize) {
-				double sum = 0;
-				for (int i = 0; i < readSize; i++) {  
-				    // 这里没有做运算的优化，为了更加清晰的展示代码  
-				    sum += buffer[i] * buffer[i]; 
-				} 
-				if (readSize > 0) {
-					double amplitude = sum / readSize;
-//					mVolume =  Math.sqrt(amplitude);
-					mVolume = 10 * Math.log10(amplitude);
-				}
-			};
+
 		}.start();
+
+		Log.d(tag, "record thread start...");
 	}
+
+	/**
+	 * 此计算方法来自samsung开发范例
+	 *
+	 * @param buffer buffer
+	 * @param readSize readSize
+	 */
+	private void calculateRealVolume(short[] buffer, int readSize) {
+		double sum = 0;
+		for (int i = 0; i < readSize; i++) {
+			// 这里没有做运算的优化，为了更加清晰的展示代码
+			sum += buffer[i] * buffer[i];
+		}
+		if (readSize > 0 && sum > 0) {
+			double amplitude = sum / readSize;
+//					mVolume =  Math.sqrt(amplitude);
+			mVolume = 10 * Math.log10(amplitude);
+		}
+	};
+
+
+
 	private double mVolume;
 	public double getVolume(){
 		return mVolume;
@@ -122,6 +139,14 @@ public class MP3Recorder {
 	public void stop(){
 		mIsRecording = false;
 	}
+
+	public void releaseRecord(){
+		if(null != mAudioRecord){
+			mAudioRecord.stop();
+			mAudioRecord.release();
+		}
+
+	}
 	public boolean isRecording() {
 		return mIsRecording;
 	}
@@ -131,7 +156,7 @@ public class MP3Recorder {
 	private void initAudioRecorder() throws IOException {
 		mBufferSize = AudioRecord.getMinBufferSize(DEFAULT_SAMPLING_RATE,
 				DEFAULT_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat());
-		
+
 		int bytesPerFrame = DEFAULT_AUDIO_FORMAT.getBytesPerFrame();
 		/* Get number of samples. Calculate the buffer size 
 		 * (round up to the factor of given frame size) 
@@ -142,12 +167,13 @@ public class MP3Recorder {
 			frameSize += (FRAME_COUNT - frameSize % FRAME_COUNT);
 			mBufferSize = frameSize * bytesPerFrame;
 		}
-		
+
+		Log.d(tag,"initAudioRecorder,Setup audio recorder ");
 		/* Setup audio recorder */
 		mAudioRecord = new AudioRecord(DEFAULT_AUDIO_SOURCE,
 				DEFAULT_SAMPLING_RATE, DEFAULT_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat(),
 				mBufferSize);
-		
+		Log.d(tag,"initAudioRecorder："+mAudioRecord);
 		mPCMBuffer = new short[mBufferSize];
 		/*
 		 * Initialize lame buffer
