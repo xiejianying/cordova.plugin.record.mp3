@@ -1,0 +1,48 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+    <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+            id="com.iswoo.plugin.cordova.mediarecord" version="0.0.1">
+        <name>MediaPlugin</name>
+        <description>Cordova audio Plugin</description>
+        <license>Apache 2.0</license>
+        <keywords>cordova,media,record</keywords>
+        <js-module src="www/MywooMedia.js" name="myMedia">
+            <clobbers target="MywooMedia" />
+        </js-module>
+        
+    <!-- android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="MediaPlugin" >
+                <param name="android-package" value="com.plugin.MediaPlugin"/>
+            </feature>
+        </config-file>
+        
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.RECORD_AUDIO" />
+            <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+        </config-file>
+        
+        <source-file src="src/android/MediaPlugin.java" target-dir="src/com/plugin" />
+        <source-file src="src/android/DataEncodeThread.java" target-dir="src/com/czt/mp3recorder" />
+        <source-file src="src/android/LameUtil.java" target-dir="src/com/czt/mp3recorder/util" />
+        <source-file src="src/android/MP3Recorder.java" target-dir="src/com/czt/mp3recorder" />
+        <source-file src="src/android/PCMFormat.java" target-dir="src/com/czt/mp3recorder" />
+        
+        <source-file src="src/android/armeabi/libmp3lame.so" target-dir="libs/armeabi" />
+        <source-file src="src/android/armeabi-v7a/libmp3lame.so" target-dir="libs/armeabi-v7a" />
+        <source-file src="src/android/flame.jar" target-dir="libs" />
+        <!--
+        <source-file src="src/android/MediaPlugin.java" target-dir="src/main/java/com/plugin" />
+        <source-file src="src/android/DataEncodeThread.java" target-dir="src/main/java/com/czt/mp3recorder" />
+        <source-file src="src/android/LameUtil.java" target-dir="src/main/java/com/czt/mp3recorder/util" />
+        <source-file src="src/android/MP3Recorder.java" target-dir="src/main/java/com/czt/mp3recorder" />
+        <source-file src="src/android/PCMFormat.java" target-dir="src/main/java/com/czt/mp3recorder" />
+        
+        <source-file src="src/android/armeabi/libmp3lame.so" target-dir="src/main/jniLibs/armeabi" />
+        <source-file src="src/android/armeabi-v7a/libmp3lame.so" target-dir="src/main/jniLibs/armeabi-v7a" />
+        -->
+    </platform>
+    </plugin>
